@@ -1,0 +1,66 @@
+name: Update library branch
+
+on:
+  workflow_call:
+
+jobs:
+  update-library:
+    name: Update the library branch with changes from master branch
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout master branch
+        uses: actions/checkout@v3
+        with:
+          path: master
+
+      - name: Create a library branch if it doesn't exist
+        uses: peterjgrainger/action-create-branch@v2.2.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          branch: library
+
+      - name: Checkout library branch
+        uses: actions/checkout@v3
+        with:
+          ref: library
+          path: library
+          fetch-depth: 0
+
+      - name: Reset library branch to master
+        run: |
+          cd $GITHUB_WORKSPACE/library
+          git reset origin/master --hard
+          cd $GITHUB_WORKSPACE
+      - name: Clear library folder
+        run: |
+            cd $GITHUB_WORKSPACE/library
+            echo "Removed library files:"
+            shopt -s extglob
+            shopt -s dotglob
+            rm -rfv !(".git"|"."|"..")
+            shopt -u dotglob
+            shopt -u extglob
+            echo "Library file list:"
+            ls -la
+            cd $GITHUB_WORKSPACE
+
+      - name: Move master project files to the library branch
+        run: |
+          LVPROJ=$(find $GITHUB_WORKSPACE/master -name *.lvproj)
+          echo "LabVIEW project file: ${LVPROJ}"
+          LVDIR=$(dirname ${LVPROJ})
+          echo "LabVIEW project directory: ${LVDIR}"
+          mv ${LVDIR}/* $GITHUB_WORKSPACE/library
+          echo "Library file list:"
+          ls -la $GITHUB_WORKSPACE/library
+
+      - name: Push changes from the library branch
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          branch: library
+          repository: library
+          push_options: '--force'
