@@ -4,14 +4,14 @@ on:
   push:
     branches:
     - master
-    pull_request:
-      branches:
-      - master
-    workflow_dispatch:
+  pull_request:
+    branches:
+    - master
+  workflow_dispatch:
 
 jobs:
   call-lv-update-library:
     name: Call "Update library branch"
-    uses: sw4sys/.github/workflows/lv_update_library.yml@master
+    uses: sw4sys/.github/.github/workflows/lv_update_library.yml@master
     permissions:
       contents: write
