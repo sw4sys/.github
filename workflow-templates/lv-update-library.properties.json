@@ -1,0 +1,5 @@
+{
+    "name": "LabVIEW: update library branch",
+    "description": "This workflow calls 'Update library branch'.",
+    "iconName": "sw4sys"
+}
